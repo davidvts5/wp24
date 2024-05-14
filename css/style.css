@@ -1,0 +1,80 @@
+body{
+    background-color: #ecffe9;
+    color: #34694c;
+}
+.navbar
+{
+    background-color: #ecffe9;
+}
+a:visited{
+    text-decoration: none;
+    decoration:none;
+}
+.navbar-brand{
+    color: #172d23;
+}
+.custom-margin-left{
+    margin-left: 250px;
+}
+a.nav-link:hover, a.navbar-brand:hover{
+    transition: color 0.3s, background-color 0.3s;
+    color: #172d23;
+}
+.ms-6{
+    margin-left:0%;
+}
+.dropdown-menu,.dropdown-item:hover{
+    background-color: #deffd7;
+
+    color: #172d23;
+}
+.dropdown-menu a:hover {
+    text-decoration: underline;
+}
+.custom-margin-right{
+    margin-right: 8.5%;
+}
+@media (min-width: 750px) {
+    .dropdown:hover .dropdown-menu {
+        display: inline;
+        right: auto;
+        left: auto;
+    }
+    .ms-6{
+        margin-left: 8%;
+    }
+}
+.card{
+    background-color: #ecffe9;
+    border:2px solid #509870;
+}
+.form-control{
+    background-color: #ecffe9;
+    border:2px solid #509870 ;
+}
+.form-control:focus {
+    border-color: #509870;
+    box-shadow: 0 0 0 0.2rem rgba(52, 105, 76, 0.2);
+    background-color: #ecffe9;
+}
+.card a{
+    color:#34694c;
+}
+.card a:hover{
+    color:#172d23;
+    transition: 0.3s;
+}
+.card button{
+    background-color: #34694c;
+    border:none;
+    border-radius:5px;
+    padding:8px 10px;
+    color:#fff;
+}
+.card button:hover{
+    background-color: #254d3d;
+    transition: 0.3s;
+}
+.card button:active{
+    background-color: #34694c;
+}
