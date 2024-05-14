@@ -1,0 +1,28 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+.container {
+    margin-top: 50px;
+    text-align: center;
+}
+.card {
+    border: none;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    background-color: #deffd7;
+    padding:20%;
+}
+.card-body {
+    padding: 30px;
+}
+.success-icon {
+    font-size: 4rem;
+    color: #509870;
+}
+.btn {
+    background-color: #509870;
+    border: none;
+}
+.btn:hover {
+    background-color: #509870;
+}

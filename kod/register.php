@@ -1,3 +1,32 @@
+<?php
+// Uključivanje fajla za konekciju sa bazom
+global $conn;
+require_once "db_config.php";
+
+// Provera da li su podaci poslati metodom POST
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Prihvatanje vrednosti iz forme
+    $first_name = $_POST["first_name"];
+    $last_name = $_POST["last_name"];
+    $email = $_POST["email"];
+    $password = $_POST["password"];
+
+    // Hashovanje lozinke pre čuvanja u bazi
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    // SQL upit za dodavanje korisnika u bazu
+    $sql = "INSERT INTO user (first_name, last_name, email, password) VALUES ('$first_name', '$last_name', '$email', '$hashed_password')";
+
+    if ($conn->query($sql) == TRUE) {
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+    header("Location:success.php");
+}
+$token = bin2hex(random_bytes(16));
+echo $token;
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -49,24 +78,24 @@
             <div class="card shadow">
                 <div class="card-body">
                     <h5 class="card-title text-center">Create your account</h5><br>
-                    <form>
+                    <form method="POST">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="firstName" class="form-label">First Name</label>
-                                <input type="text" class="form-control" id="firstName" placeholder="Enter first name" required>
+                                <input type="text" class="form-control" id="firstName" name="first_name" placeholder="Enter first name" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="lastName" class="form-label">Last Name</label>
-                                <input type="text" class="form-control" id="lastName" placeholder="Enter last name" required>
+                                <input type="text" class="form-control" id="lastName" name="last_name" placeholder="Enter last name" required>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="email" placeholder="Enter email" required>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" placeholder="Password" required>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                         </div>
                         <div class="mb-3">
                             <label for="confirmPassword" class="form-label">Confirm Password</label>
