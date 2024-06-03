@@ -18,7 +18,7 @@
                 <i class="bi bi-check-circle-fill success-icon"></i>
                 <h5 class="card-title mt-3">Registration Successful!</h5>
                 <p class="card-text">Your account has been successfully created.</p>
-                <a href="index.html" class="btn btn-primary">Return to Homepage</a>
+                <a href="index.php" class="btn btn-primary">Return to Homepage</a>
             </div>
         </div>
     </div>

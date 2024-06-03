@@ -1,6 +1,4 @@
 <?php
-global $conn;
-require_once ('db_config.php');
 session_start();
 ?>
 <!doctype html>
@@ -8,7 +6,7 @@ session_start();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PawsPlanet - Browse</title>
+    <title>PawsPlanet</title>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
@@ -65,64 +63,13 @@ session_start();
         </div>
     </div>
 </nav>
-
-<div class="container mt-5">
-    <div class="row">
-        <!-- Leva kolona - oglasi -->
-        <div class="col-md-8">
-            <h2>Ads</h2>
-            <div class="row">
-                <?php
-                // Izvršavanje upita za dohvatanje podataka o oglasima
-                $stmt = $conn->prepare("SELECT title, price FROM listings");
-                $stmt->execute();
-
-                // Postavljanje rezultata u asocijativni niz
-                $ads = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                foreach ($ads as $ad) {
-                    ?>
-                    <div class="col-md-4 mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title"><?php echo htmlspecialchars($ad['title']); ?></h5>
-                                <p class="card-text">Price: $<?php echo htmlspecialchars($ad['price']); ?></p>
-                                <a href="#" class="btn btn-primary">View Details</a>
-                            </div>
-                        </div>
-                    </div>
-                    <?php
-                }
-                ?>
-            </div>
-        </div>
-
-        <!-- Desna kolona - forma za filtriranje -->
-        <div class="col-md-4">
-            <h4>Search Filters</h4>
-            <form method="GET" action="browse.php">
-                <div class="mb-3">
-                    <label for="search" class="form-label">Search</label>
-                    <input type="text" class="form-control" id="search" name="search" placeholder="Enter dog name">
-                </div>
-                <div class="mb-3">
-                    <label for="breed" class="form-label">Breed</label>
-                    <select class="form-select" id="breed" name="breed">
-                        <option value="">Select breed</option>
-                        <option value="Labrador">Labrador</option>
-                        <option value="German Shepherd">German Shepherd</option>
-                        <option value="Golden Retriever">Golden Retriever</option>
-                        <!-- Dodajte više opcija po potrebi -->
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-        </div>
-    </div>
-</div>
+<?php
+if(isset($_SESSION['user_firstname'])){
+    echo "Welcome " . $_SESSION['user_firstname'];
+}
+else{
+    echo "User is not logged in.";
+}
+?>
 </body>
 </html>
-
-<?php
-$conn = null;
-?>

@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,7 +15,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light shadow-sm p-2">
     <div class="container-fluid">
-        <a class="navbar-brand p-1 ms-6" href="index.html">PawsPlanet</a>
+        <a class="navbar-brand p-1 ms-6" href="indexuser.php">PawsPlanet</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>

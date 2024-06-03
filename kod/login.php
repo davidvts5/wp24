@@ -1,3 +1,47 @@
+<?php
+session_start();
+if (isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
+// Uključivanje fajla za konekciju sa bazom
+global $conn;
+require_once "db_config.php";
+
+// Provera da li su podaci poslati metodom POST
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Prihvatanje vrednosti iz forme
+    $email = $_POST["email"];
+    $password = $_POST["password"];
+
+    // SQL upit za proveru korisnika u bazi
+    $sql = "SELECT * FROM user WHERE email = :email";
+
+    // Priprema i izvršavanje SQL upita koristeći PDO
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':email', $email);
+    $stmt->execute();
+
+    // Dobijanje podataka o korisniku
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Provera da li korisnik postoji i da li je uneta ispravna lozinka
+    if ($user && password_verify($password, $user['password'])) {
+        // Uspešna prijava, pohranjujemo ime korisnika u sesiju
+        session_start();
+        $_SESSION['user_id'] = $user['id']; // Postavljanje user_id u sesiju
+        $_SESSION['user_firstname'] = $user['first_name'];
+
+        // Preusmeravamo korisnika na početnu stranicu
+        header("Location: index.php");
+        exit();
+    } else {
+        // Neuspešna prijava, možemo sada preusmeriti korisnika nazad na login stranicu sa odgovarajućom porukom
+        $error = "Invalid email or password";
+    }
+}
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,7 +57,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light shadow-sm p-2">
     <div class="container-fluid">
-        <a class="navbar-brand p-1 ms-6" href="index.html">PawsPlanet</a>
+        <a class="navbar-brand p-1 ms-6" href="index.php">PawsPlanet</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -43,25 +87,28 @@
         </div>
     </div>
 </nav>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow">
                 <div class="card-body">
-                    <h5 class="card-title text-center">Sign in to your account</h5>
-                    <form>
+                    <h5 class="card-title text-center">Login to your account</h5><br>
+                    <?php if (isset($error)): ?>
+                        <div class="alert alert-danger" role="alert">
+                            <?php echo $error; ?>
+                        </div>
+                    <?php endif; ?>
+                    <form method="POST">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="email" placeholder="Enter email" required>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" placeholder="Password" required>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                         </div>
-                        <div class="mb-3">
-                            <a href="#" class="form-text text-end">Forgot password?</a>
-                        </div>
-                        <button type="submit" class="button">Sign in</button>
+                        <button type="submit" class="btn btn-primary">Sign in</button>
                         <span class="mt-3 ms-3">Don't have an account? <a href="register.php">Sign up</a></span>
                     </form>
 

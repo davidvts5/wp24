@@ -78,3 +78,25 @@ a.nav-link:hover, a.navbar-brand:hover{
 .card button:active{
     background-color: #34694c;
 }
+.dropdown-menu[data-bs-popper]{
+    margin-top:0!important;
+}
+.btn{
+    color:#fff!important;
+}
+.btn-primary{
+margin-right: 20px;
+    background-color: #34694c;
+    border:none;
+    border-radius:5px;
+    padding-left: 20px;
+    padding-right: 20px;
+    color:#fff;
+}
+.btn-primary:hover{
+    background-color: #254d3d;
+    transition: 0.3s;
+}
+ .btn-primary:active{
+    background-color: #34694c;
+}
