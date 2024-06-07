@@ -29,7 +29,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($user && password_verify($password, $user['password'])) {
         // Uspešna prijava, pohranjujemo ime korisnika u sesiju
         session_start();
-        $_SESSION['user_id'] = $user['id']; // Postavljanje user_id u sesiju
+        $_SESSION['user_id'] = $user['user_id']; // Postavljanje user_id u sesiju
+        $_SESSION['email']=$user['email'];
+        $_SESSION['phone']=$user['phone'];
         $_SESSION['user_firstname'] = $user['first_name'];
 
         // Preusmeravamo korisnika na početnu stranicu

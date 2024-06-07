@@ -100,3 +100,35 @@ margin-right: 20px;
  .btn-primary:active{
     background-color: #34694c;
 }
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+.browse .card:hover {
+    box-shadow: 0 0 1rem rgb(0, 0, 0,.3);
+    transition: .33s;
+}
+.oglasi{
+    border-radius: 8%;
+}
+.filter-form {
+    border:2px solid #509870;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #ecffe9;
+    max-width: 100%;
+}
+.filter-form h4 {
+    margin-top: 0;
+}
+.browse .card{
+    background-color: #c8e1b8;
+}
+.form-group
+{
+    background-color: #c8e1b8;
+    margin-top:10px;
+    margin-bottom: 10px;
+    padding:10px;
+    border-radius: 2%;
+}

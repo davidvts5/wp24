@@ -35,7 +35,7 @@ session_start();
             <ul class="navbar-nav custom-margin-right">
                 <?php if (isset($_SESSION['user_firstname'])): ?>
                     <li class="nav-item">
-                        <a class="btn btn-primary p-2 ms-3" href="#">
+                        <a class="btn btn-primary p-2 ms-3" href="add_listing.php">
                             &nbsp;Create Listing&nbsp;
                         </a>
                     </li>
@@ -68,13 +68,56 @@ session_start();
 
 <div class="container mt-5">
     <div class="row">
+        <!-- Desna kolona - forma za filtriranje -->
+        <div class="col-md-4 order-1 order-md-2">
+            <div class="filter-form">
+                <h4>Search Filters</h4>
+                <form method="GET" action="browse.php">
+                    <div class="mb-3">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="search" name="search" placeholder="Enter ad title">
+                    </div>
+                    <div class="mb-3">
+                        <label for="animal_type" class="form-label">Animal Type</label>
+                        <select class="form-select" id="animal_type" name="animal_type" onchange="updateBreedOptions()">
+                            <option value="">Select animal type</option>
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Fish">Fish</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="breed" class="form-label">Breed</label>
+                        <select class="form-select" id="breed" name="breed">
+                            <option value="">Select animal type</option>
+                            <!-- Breed options will be updated based on animal type -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <div class="d-flex">
+                            <input type="number" class="form-control me-2" id="min_age" name="min_age" placeholder="Min age">
+                            <input type="number" class="form-control" id="max_age" name="max_age" placeholder="Max age">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Price</label>
+                        <div class="d-flex">
+                            <input type="number" class="form-control me-2" id="min_price" name="min_price" placeholder="Min price">
+                            <input type="number" class="form-control" id="max_price" name="max_price" placeholder="Max price">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+        </div>
         <!-- Leva kolona - oglasi -->
-        <div class="col-md-8">
-            <h2>Ads</h2>
+        <div class="col-md-8 order-2 order-md-1 browse">
             <div class="row">
                 <?php
                 // Izvršavanje upita za dohvatanje podataka o oglasima
-                $stmt = $conn->prepare("SELECT title, price FROM listings");
+                $stmt = $conn->prepare("SELECT title, price, image FROM listings");
                 $stmt->execute();
 
                 // Postavljanje rezultata u asocijativni niz
@@ -82,8 +125,9 @@ session_start();
 
                 foreach ($ads as $ad) {
                     ?>
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-3 mb-4">
                         <div class="card">
+                            <img src="<?php echo htmlspecialchars($ad['image']); ?>" class="card-img-top p-2 oglasi" alt="Ad Image">
                             <div class="card-body">
                                 <h5 class="card-title"><?php echo htmlspecialchars($ad['title']); ?></h5>
                                 <p class="card-text">Price: $<?php echo htmlspecialchars($ad['price']); ?></p>
@@ -96,33 +140,34 @@ session_start();
                 ?>
             </div>
         </div>
-
-        <!-- Desna kolona - forma za filtriranje -->
-        <div class="col-md-4">
-            <h4>Search Filters</h4>
-            <form method="GET" action="browse.php">
-                <div class="mb-3">
-                    <label for="search" class="form-label">Search</label>
-                    <input type="text" class="form-control" id="search" name="search" placeholder="Enter dog name">
-                </div>
-                <div class="mb-3">
-                    <label for="breed" class="form-label">Breed</label>
-                    <select class="form-select" id="breed" name="breed">
-                        <option value="">Select breed</option>
-                        <option value="Labrador">Labrador</option>
-                        <option value="German Shepherd">German Shepherd</option>
-                        <option value="Golden Retriever">Golden Retriever</option>
-                        <!-- Dodajte više opcija po potrebi -->
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-        </div>
     </div>
 </div>
 </body>
 </html>
+<script>
+    function updateBreedOptions() {
+        var animalType = document.getElementById("animal_type").value;
+        var breedSelect = document.getElementById("breed");
+        breedSelect.innerHTML = ""; // Clear existing options
 
+        var breeds = {
+            "Dog": ["Labrador", "German Shepherd", "Golden Retriever"],
+            "Cat": ["Persian", "Maine Coon", "Siamese"],
+            "Fish": ["Goldfish", "Betta", "Guppy"],
+            "Other": ["Parrot", "Hamster", "Rabbit"]
+        };
+
+        if (breeds[animalType]) {
+            breeds[animalType].forEach(function(breed) {
+                var option = document.createElement("option");
+                option.value = breed;
+                option.text = breed;
+                breedSelect.appendChild(option);
+            });
+        }
+    }
+</script>
 <?php
+
 $conn = null;
 ?>
