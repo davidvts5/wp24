@@ -1,5 +1,48 @@
 <?php
+global $conn;
+include ('db_config.php');
 session_start();
+if(!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+if (isset($_GET['action']) && isset($_GET['id'])) {
+    $listing_id = $_GET['id'];
+    $user_id = $_SESSION['user_id'];
+
+    try {
+        if ($_GET['action'] == 'add') {
+            // Dodavanje u favorites
+            $stmt = $conn->prepare("INSERT INTO favorites (user_id, listing_id) VALUES (:user_id, :listing_id)");
+        } elseif ($_GET['action'] == 'remove') {
+            // Uklanjanje iz favorites
+            $stmt = $conn->prepare("DELETE FROM favorites WHERE user_id = :user_id AND listing_id = :listing_id");
+        } else {
+            echo "Invalid action";
+            exit();
+        }
+
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->bindParam(':listing_id', $listing_id, PDO::PARAM_INT);
+        $stmt->execute();
+        echo "success";
+        exit();
+    } catch(PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        exit();
+    }
+}
+
+try {
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT listing_id, title, price, description, image FROM listings WHERE listing_id IN (SELECT listing_id FROM favorites WHERE user_id = :user_id)");
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -11,6 +54,8 @@ session_start();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="favorites-ajax.js"></script>
 </head>
 <body>
 
@@ -65,13 +110,23 @@ session_start();
         </div>
     </div>
 </nav>
-<?php
-if(isset($_SESSION['user_firstname'])){
-    echo "Welcome " . $_SESSION['user_firstname'];
-}
-else{
-    echo "User is not logged in.";
-}
-?>
+<div class="container mt-5">
+    <h1 class="mb-4">Your Favorite Pets</h1>
+    <div class="row">
+        <?php foreach ($favorites as $favorite): ?>
+            <div class="col-md-4">
+                <div class=" card mb-4 shadow-sm favcard">
+                    <img src="<?php echo htmlspecialchars($favorite['image']); ?>" class="card-img-top p-2 oglasi" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title"><?php echo htmlspecialchars($favorite['title']); ?></h5>
+                        <p class="card-text">Price: $<?php echo htmlspecialchars($favorite['price']); ?></p>
+                        <a href="listing.php?id=<?php echo htmlspecialchars($favorite['listing_id']); ?>" class="btn btn-primary">View Details</a>
+                        <a href="#" class="btn btn-danger remove-from-favorites" data-id="<?php echo htmlspecialchars($favorite['listing_id']); ?>">Remove from favorites</a>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
 </body>
 </html>

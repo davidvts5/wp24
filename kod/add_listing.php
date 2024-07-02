@@ -11,7 +11,8 @@ if (!isset($_SESSION['user_firstname'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = $_POST['title'];
     $phone = $_POST['phone'];
-    $email = $_POST['email'];
+    $email = $_SESSION['email'];
+    $description = $_POST['description'];
     $price = $_POST['price'];
     $user_id = $_SESSION['user_id'];
 
@@ -48,11 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
             // Unesi podatke u bazu
-            $stmt = $conn->prepare("INSERT INTO listings (user_id, title, phone, email, price, image, approved) VALUES (:user_id, :title, :phone, :email, :price, :image, 0)");
+            $stmt = $conn->prepare("INSERT INTO listings (user_id, title, phone, email,description, price, image, approved) VALUES (:user_id, :title, :phone, :email,:description, :price, :image, 0)");
             $stmt->bindParam(':user_id', $user_id);
             $stmt->bindParam(':title', $title);
             $stmt->bindParam(':phone', $phone);
             $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':description', $description);
             $stmt->bindParam(':price', $price);
             $stmt->bindParam(':image', $target_file);
             $stmt->execute();
@@ -105,6 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <i class="bi bi-person-fill"></i> <?php echo htmlspecialchars($_SESSION['user_firstname']); ?>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="favorite_pets.php">Favorite pets</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">Edit account</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="logout.php">Sign out</a></li>
@@ -138,21 +142,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
                 <div class="form-group">
                     <label for="phone" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" id="phone" name="phone" value="<?php echo $_SESSION['phone']?>" required>
+                    <input type="text" class="form-control" id="phone" name="phone" value="<?php echo $_SESSION['phone']?>" readonly required>
                 </div>
                 <div class="form-group">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?php echo $_SESSION['email']?>" required>
+                    <input type="email" class="form-control" id="email" name="email" value="<?php echo $_SESSION['email']?>" readonly required>
                 </div>
                 <div class="form-group">
                     <label for="price" class="form-label">Price</label>
-                    <input type="number" step="10" class="form-control" id="price" name="price" required>
+                    <input type="number" class="form-control" id="price" name="price" required>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="animal_type" class="form-label">Animal Type</label>
-                    <input type="text" class="form-control" id="animal_type" name="animal_type" required>
+                    <select class="form-select ddlist" id="animal_type" name="animal_type" required>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Fish">Fish</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="breed" class="form-label">Breed</label>
@@ -170,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
         <div class="form-group">
             <label for="description" class="form-label">Description</label>
-            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Submit Listing</button>
     </form>

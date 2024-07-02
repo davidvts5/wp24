@@ -20,12 +20,9 @@ a.nav-link:hover, a.navbar-brand:hover{
     transition: color 0.3s, background-color 0.3s;
     color: #172d23;
 }
-.ms-6{
-    margin-left:0%;
-}
 .dropdown-menu,.dropdown-item:hover{
     background-color: #deffd7;
-
+    --bs-dropdown-link-hover-bg:#deffd7!important;
     color: #172d23;
 }
 .dropdown-menu a:hover {
@@ -109,7 +106,7 @@ margin-right: 20px;
     transition: .33s;
 }
 .oglasi{
-    border-radius: 8%;
+    border-radius: 14px;
 }
 .filter-form {
     border:2px solid #509870;
@@ -130,5 +127,40 @@ margin-right: 20px;
     margin-top:10px;
     margin-bottom: 10px;
     padding:10px;
-    border-radius: 2%;
+    border-radius: 10px;
+}
+.ddlist{
+    border-color: #509870;
+    border:  #509870 solid 2px;
+    background-color: #ecffe9;
+}
+.ddlist:focus{
+    border-color: #509870;
+    background-color: #ecffe9;
+    box-shadow: 0 0 0 0.2rem rgba(52, 105, 76, 0.2);
+}
+.border-primary{
+    border:solid #34694c 3px!important;
+    border-radius: 50px;
+}
+hr{
+
+}
+h5{
+    font-weight: normal;
+}
+.des{
+    float:right;
+}
+.btn-primary{
+    --bs-btn-active-bg:#34694c!important;
+}
+.border{
+    border:solid #34694c 2px!important;
+    border-radius: 10px;
+}
+.favcard:hover
+{
+    box-shadow: 0 0 1rem rgb(0, 0, 0,.3);
+    transition: .33s;
 }

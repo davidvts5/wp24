@@ -1,4 +1,6 @@
 <?php
+include ('db_config.php');
+global $conn;
 session_start();
 ?>
 <!doctype html>
@@ -11,6 +13,8 @@ session_start();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="favorites-ajax.js"></script>
 </head>
 <body>
 
@@ -66,11 +70,41 @@ session_start();
     </div>
 </nav>
 <?php
-if(isset($_SESSION['user_firstname'])){
-    echo "Welcome " . $_SESSION['user_firstname'];
-}
-else{
-    echo "User is not logged in.";
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+
+    try {
+        $stmt = $conn->prepare("SELECT listing_id, title, price, description, image FROM listings WHERE listing_id = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $ad = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($ad) {
+            echo "<div class='container mt-5 ms-6 p-5 shadow-lg border-primary'>";
+            echo "<div class='row'>";
+            echo "<div class='col-md-6'>";
+            echo "<img src='" . htmlspecialchars($ad['image']) . "' class='shadow-lg border mb-3' width='50%' alt='Ad Image'>";
+            echo "</div>";
+            echo "<div class='col-md-6'>";
+            if(isset($_SESSION['user_firstname'])) {
+                echo "<button class='des btn btn-primary add-to-favorites' data-id='" . htmlspecialchars($ad['listing_id']) . "'>Add to favorites <i class='bi bi-heart-fill'></i></button>";
+            }
+            echo "<h1>" . htmlspecialchars($ad['title']) . "</h1>";
+
+            echo "<h5><i>Price: $" . htmlspecialchars($ad['price']) . "</i></h5>";
+            echo "<hr>";
+            echo "<p>" . htmlspecialchars($ad['description']) . "</p>";
+            echo "</div>";
+            echo "</div>";
+            echo "</div>";
+        } else {
+            echo "Listing not found.";
+        }
+    } catch(PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
+} else {
+    echo "Listing ID not provided.";
 }
 ?>
 </body>

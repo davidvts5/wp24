@@ -21,41 +21,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST["email"];
     $phone = $_POST["phone"];
     $password = $_POST["password"];
+    $confirm_password=$_POST["confirm_password"];
 
-    try {
-        // Provera da li email već postoji u bazi
-        $check_email_query = "SELECT * FROM user WHERE email = :email";
-        $stmt = $conn->prepare($check_email_query);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            // Ako email već postoji, postavi poruku o grešci
-            $error_message = "The email address is already registered.";
-        } else {
-            // Hashovanje lozinke pre čuvanja u bazi
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-            // SQL upit za dodavanje korisnika u bazu
-            $sql = "INSERT INTO user (first_name, last_name, email, password,phone) VALUES (:first_name, :last_name, :email, :password,:phone)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':first_name', $first_name);
-            $stmt->bindParam(':last_name', $last_name);
+    if($password!==$confirm_password)
+    {
+        $error_message = "The two passwords must match!!!";
+    }
+    else {
+        try {
+            // Provera da li email već postoji u bazi
+            $check_email_query = "SELECT * FROM user WHERE email = :email";
+            $stmt = $conn->prepare($check_email_query);
             $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':phone', $phone);
-            $stmt->bindParam(':password', $hashed_password);
+            $stmt->execute();
 
-
-            if ($stmt->execute()) {
-                // Uspešno dodavanje, preusmeri na success.php
-                header("Location: success.php");
-                exit();
+            if ($stmt->rowCount() > 0) {
+                // Ako email već postoji, postavi poruku o grešci
+                $error_message = "The email address is already registered.";
             } else {
-                $error_message = "Error: Could not execute the query.";
+
+
+                // Hashovanje lozinke pre čuvanja u bazi
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+                // SQL upit za dodavanje korisnika u bazu
+                $sql = "INSERT INTO user (first_name, last_name, email, password,phone) VALUES (:first_name, :last_name, :email, :password,:phone)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bindParam(':first_name', $first_name);
+                $stmt->bindParam(':last_name', $last_name);
+                $stmt->bindParam(':email', $email);
+                $stmt->bindParam(':phone', $phone);
+                $stmt->bindParam(':password', $hashed_password);
+
+
+                if ($stmt->execute()) {
+                    // Uspešno dodavanje, preusmeri na success.php
+                    header("Location: success.php");
+                    exit();
+                } else {
+                    $error_message = "Error: Could not execute the query.";
+                }
+
             }
+        } catch (PDOException $e) {
+            $error_message = "Error: " . $e->getMessage();
         }
-    } catch (PDOException $e) {
-        $error_message = "Error: " . $e->getMessage();
     }
 }
 ?>
@@ -146,7 +156,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </div>
                         <div class="mb-3">
                             <label for="confirmPassword" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" required>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirm_password" placeholder="Confirm Password" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Sign up</button>
                         <span class="mt-3 ms-3">Already have an account? <a href="login.php">Sign in</a></span>

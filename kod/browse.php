@@ -44,6 +44,8 @@ session_start();
                             <i class="bi bi-person-fill"></i> <?php echo htmlspecialchars($_SESSION['user_firstname']); ?>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="favorite_pets.php">Favorite pets</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">Edit account</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="logout.php">Sign out</a></li>
@@ -69,7 +71,7 @@ session_start();
 <div class="container mt-5">
     <div class="row">
         <!-- Desna kolona - forma za filtriranje -->
-        <div class="col-md-4 order-1 order-md-2">
+        <div class="col-md-4 order-1 order-md-2 mb-3">
             <div class="filter-form">
                 <h4>Search Filters</h4>
                 <form method="GET" action="browse.php">
@@ -79,7 +81,7 @@ session_start();
                     </div>
                     <div class="mb-3">
                         <label for="animal_type" class="form-label">Animal Type</label>
-                        <select class="form-select" id="animal_type" name="animal_type" onchange="updateBreedOptions()">
+                        <select class="form-select ddlist" id="animal_type" name="animal_type" onchange="updateBreedOptions()">
                             <option value="">Select animal type</option>
                             <option value="Dog">Dog</option>
                             <option value="Cat">Cat</option>
@@ -89,7 +91,7 @@ session_start();
                     </div>
                     <div class="mb-3">
                         <label for="breed" class="form-label">Breed</label>
-                        <select class="form-select" id="breed" name="breed">
+                        <select class="form-select ddlist" id="breed" name="breed">
                             <option value="">Select animal type</option>
                             <!-- Breed options will be updated based on animal type -->
                         </select>
@@ -116,8 +118,13 @@ session_start();
         <div class="col-md-8 order-2 order-md-1 browse">
             <div class="row">
                 <?php
+                if (isset($_GET['search'])){
+                    $search = $_GET['search'];
+                }
+
                 // Izvršavanje upita za dohvatanje podataka o oglasima
-                $stmt = $conn->prepare("SELECT title, price, image FROM listings");
+                $stmt = $conn->prepare("SELECT listing_id,title, price, image FROM listings");
+
                 $stmt->execute();
 
                 // Postavljanje rezultata u asocijativni niz
@@ -125,16 +132,17 @@ session_start();
 
                 foreach ($ads as $ad) {
                     ?>
-                    <div class="col-md-3 mb-4">
+                    <div class="col-6 col-md-3 mb-4">
                         <div class="card">
                             <img src="<?php echo htmlspecialchars($ad['image']); ?>" class="card-img-top p-2 oglasi" alt="Ad Image">
                             <div class="card-body">
                                 <h5 class="card-title"><?php echo htmlspecialchars($ad['title']); ?></h5>
                                 <p class="card-text">Price: $<?php echo htmlspecialchars($ad['price']); ?></p>
-                                <a href="#" class="btn btn-primary">View Details</a>
+                                <a href="listing.php?id=<?php echo htmlspecialchars($ad['listing_id']); ?>" class="btn btn-primary">View Details</a><br>
                             </div>
                         </div>
                     </div>
+
                     <?php
                 }
                 ?>
