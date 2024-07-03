@@ -1,10 +1,46 @@
 <?php
-global $conn;
+global $conn, $e;
 session_start();
 require_once('db_config.php');
+
 if (!isset($_SESSION['user_firstname'])) {
     header("Location: login.php");
     exit;
+}
+
+$isAdmin = false;
+
+// Provera da li je korisnik ulogovan
+if (isset($_SESSION['user_id'])) {
+    // Ako je korisnik ulogovan, dobijamo ulogu korisnika iz baze podataka
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT role FROM user WHERE user_id = :user_id");
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Provera uloge korisnika
+    if ($user && $user['role'] === 'admin') {
+        $isAdmin = true;
+    }
+}
+
+// Dobavi kategorije za formu
+try {
+    $stmt = $conn->prepare("SELECT * FROM categories");
+    $stmt->execute();
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+
+// Dobavi rase za formu
+try {
+    $stmt = $conn->prepare("SELECT * FROM breeds");
+    $stmt->execute();
+    $breeds = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    echo "Error: " . $e->getMessage();
 }
 
 // Provera da li je forma poslata
@@ -15,6 +51,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $description = $_POST['description'];
     $price = $_POST['price'];
     $user_id = $_SESSION['user_id'];
+    $category_id = $_POST['category_id'];
+    $breed_id = $_POST['breed_option'];
+
+    if ($breed_id == 'new') {
+        $new_breed = $_POST['new_breed'];
+        // Dodaj novu rasu u bazu podataka
+        $stmt = $conn->prepare("INSERT INTO breeds (category_id, name) VALUES (:category_id, :name)");
+        $stmt->bindParam(':category_id', $category_id, PDO::PARAM_INT);
+        $stmt->bindParam(':name', $new_breed, PDO::PARAM_STR);
+        $stmt->execute();
+        // Dobij novi breed_id
+        $breed_id = $conn->lastInsertId();
+    }
 
     // Upload slike
     $target_dir = "uploads/";
@@ -31,13 +80,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $uploadOk = 0;
     }
     // Proveri veličinu fajla
-    if ($_FILES["image"]["size"] > 500000) {
+    if ($_FILES["image"]["size"] > 1000000) {
         echo "Sorry, your file is too large.";
         $uploadOk = 0;
     }
     // Dozvoli određene formate
-    if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg")
-    {
+    if ($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg") {
         echo "Sorry, only JPG, JPEG and PNG files are allowed.";
         $uploadOk = 0;
     }
@@ -49,18 +97,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
             // Unesi podatke u bazu
-            $stmt = $conn->prepare("INSERT INTO listings (user_id, title, phone, email,description, price, image, approved) VALUES (:user_id, :title, :phone, :email,:description, :price, :image, 0)");
-            $stmt->bindParam(':user_id', $user_id);
-            $stmt->bindParam(':title', $title);
-            $stmt->bindParam(':phone', $phone);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':description', $description);
-            $stmt->bindParam(':price', $price);
-            $stmt->bindParam(':image', $target_file);
+            $stmt = $conn->prepare("INSERT INTO listings1 (user_id, category_id, breed_id, title, description, price, image) VALUES (:user_id, :category_id, :breed_id, :title, :description, :price, :image)");
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->bindParam(':category_id', $category_id, PDO::PARAM_INT);
+            $stmt->bindParam(':breed_id', $breed_id, PDO::PARAM_INT);
+            $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+            $stmt->bindParam(':description', $description, PDO::PARAM_STR);
+            $stmt->bindParam(':price', $price, PDO::PARAM_STR);
+            $stmt->bindParam(':image', $target_file, PDO::PARAM_STR);
             $stmt->execute();
-            echo "The file ". htmlspecialchars(basename($_FILES["image"]["name"])) . " LISTING IS CREATED!!!!";
-        } else {
-            echo "Sorry, there was an error uploading your file.";
+
+            // Poruka o uspehu
+            echo "The file " . htmlspecialchars(basename($_FILES["image"]["name"])) . " LISTING IS CREATED!!!!";
         }
     }
 }
@@ -78,7 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-
 <nav class="navbar navbar-expand-lg navbar-light shadow-sm p-2">
     <div class="container-fluid">
         <a class="navbar-brand p-1 ms-6" href="index.php">PawsPlanet</a>
@@ -94,9 +141,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <a class="nav-link p-1 ms-3" href="#"><i class="bi bi-info-circle"></i> About us</a>
                 </li>
             </ul>
-
             <ul class="navbar-nav custom-margin-right">
                 <?php if (isset($_SESSION['user_firstname'])): ?>
+                    <?php if ($isAdmin): ?>
+                        <li class="nav-item">
+                            <a class="btn btn-danger p-2 ms-3" href="admin_page.php">ADMIN</a>
+                        </li>
+                    <?php endif; ?>
                     <li class="nav-item">
                         <a class="btn btn-primary p-2 ms-3" href="add_listing.php">
                             &nbsp;Create Listing&nbsp;
@@ -107,6 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <i class="bi bi-person-fill"></i> <?php echo htmlspecialchars($_SESSION['user_firstname']); ?>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="my_listings.php">My listings</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="favorite_pets.php">Favorite pets</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">Edit account</a></li>
@@ -155,17 +208,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="animal_type" class="form-label">Animal Type</label>
-                    <select class="form-select ddlist" id="animal_type" name="animal_type" required>
-                        <option value="Dog">Dog</option>
-                        <option value="Cat">Cat</option>
-                        <option value="Fish">Fish</option>
-                        <option value="Other">Other</option>
+                    <label for="category_id" class="form-label">Animal Type</label>
+                    <select class="form-select ddlist" id="category_id" name="category_id" required>
+                        <?php foreach($categories as $category): ?>
+                            <option value="<?php echo $category['category_id']; ?>"><?php echo $category['name']; ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="breed" class="form-label">Breed</label>
-                    <input type="text" class="form-control" id="breed" name="breed" required>
+                    <label for="breed_option" class="form-label">Breed</label>
+                    <select class="form-select ddlist" id="breed_option" name="breed_option" required>
+                        <option value="">Select existing breed</option>
+                        <?php foreach($breeds as $breed): ?>
+                            <option value="<?php echo $breed['breed_id']; ?>" data-category-id="<?php echo $breed['category_id']; ?>"><?php echo $breed['name']; ?></option>
+                        <?php endforeach; ?>
+                        <option value="new">Add new breed</option>
+                    </select>
+                    <input type="text" class="form-control mt-2" id="new_breed" name="new_breed" placeholder="Enter new breed" style="display: none;">
                 </div>
                 <div class="form-group">
                     <label for="age" class="form-label">Age</label>
@@ -184,6 +244,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <button type="submit" class="btn btn-primary">Submit Listing</button>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var categorySelect = document.getElementById('category_id');
+        var breedSelect = document.getElementById('breed_option');
+        var newBreedInput = document.getElementById('new_breed');
+
+        function filterBreeds() {
+            var selectedCategory = categorySelect.value;
+            var firstVisibleOption = null;
+
+            for (var i = 0; i < breedSelect.options.length; i++) {
+                var option = breedSelect.options[i];
+                if (option.getAttribute('data-category-id') === selectedCategory || option.value === 'new') {
+                    option.style.display = '';
+                    if (!firstVisibleOption) {
+                        firstVisibleOption = option;
+                    }
+                } else {
+                    option.style.display = 'none';
+                }
+            }
+
+            if (firstVisibleOption) {
+                breedSelect.value = firstVisibleOption.value;
+            }
+        }
+
+        function toggleNewBreedInput() {
+            if (breedSelect.value === 'new') {
+                newBreedInput.style.display = '';
+                newBreedInput.required = true;
+            } else {
+                newBreedInput.style.display = 'none';
+                newBreedInput.required = false;
+            }
+        }
+
+        categorySelect.addEventListener('change', filterBreeds);
+        breedSelect.addEventListener('change', toggleNewBreedInput);
+
+        // Initial filtering on page load
+        filterBreeds();
+        toggleNewBreedInput();
+    });
+</script>
 
 </body>
 </html>

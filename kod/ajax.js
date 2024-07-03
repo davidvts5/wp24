@@ -47,3 +47,27 @@ $(document).ready(function() {
         });
     });
 });
+$(document).ready(function() {
+    // Uklanjanje iz listings
+    $('.remove-from-listings').click(function(e) {
+        e.preventDefault(); // Prevent default link behavior
+
+        var listingId = $(this).data('id');
+
+        $.ajax({
+            url: 'remove_listing.php',
+            type: 'GET',
+            data: {
+                id: listingId
+            },
+            success: function(response) {
+                alert('Listing removed');
+                // Optionally, update UI or handle success logic
+            },
+            error: function(xhr, status, error) {
+                alert('Failed to remove listing');
+                console.error('Error:', error);
+            }
+        });
+    });
+});

@@ -1,5 +1,6 @@
-
-
+<?php
+session_start();
+?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,7 +16,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light shadow-sm p-2">
     <div class="container-fluid">
-        <a class="navbar-brand p-1 ms-6" href="indexuser.php">PawsPlanet</a>
+        <a class="navbar-brand p-1 ms-6" href="index.php">PawsPlanet</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -30,19 +31,49 @@
             </ul>
 
             <ul class="navbar-nav custom-margin-right">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-fill"></i> Account
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="login.php">Sign in</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="register.php">Create an account</a></li>
-                    </ul>
-                </li>
+                <?php if (isset($_SESSION['user_firstname'])): ?>
+                    <li class="nav-item">
+                        <a class="btn btn-primary p-2 ms-3" href="add_listing.php">
+                            &nbsp;Create Listing&nbsp;
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-fill"></i> <?php echo htmlspecialchars($_SESSION['user_firstname']); ?>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="my_listings.php">My listings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="favorite_pets.php">Favorite pets</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Edit account</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="logout.php">Sign out</a></li>
+                        </ul>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-fill"></i> Account
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="login.php">Sign in</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="register.php">Create an account</a></li>
+                        </ul>
+                    </li>
+                <?php endif; ?>
             </ul>
         </div>
     </div>
 </nav>
+<?php
+if(isset($_SESSION['user_firstname'])){
+    echo "Welcome " . $_SESSION['user_firstname'];
+}
+else{
+    echo "User is not logged in.";
+}
+?>
 </body>
 </html>

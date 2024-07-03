@@ -31,7 +31,7 @@ a.nav-link:hover, a.navbar-brand:hover{
 .custom-margin-right{
     margin-right: 8.5%;
 }
-@media (min-width: 750px) {
+@media  (min-width: 750px){
     .dropdown:hover .dropdown-menu {
         display: inline;
         right: auto;
@@ -39,6 +39,13 @@ a.nav-link:hover, a.navbar-brand:hover{
     }
     .ms-6{
         margin-left: 8%;
+    }
+
+}
+@media  (max-width: 990px)
+{
+    .ms-3{
+        margin-bottom: 15px;
     }
 }
 .card{
@@ -61,8 +68,7 @@ a.nav-link:hover, a.navbar-brand:hover{
     color:#172d23;
     transition: 0.3s;
 }
-.card button{
-    background-color: #34694c;
+.card button{    background-color: #34694c;
     border:none;
     border-radius:5px;
     padding:8px 10px;
@@ -163,4 +169,23 @@ h5{
 {
     box-shadow: 0 0 1rem rgb(0, 0, 0,.3);
     transition: .33s;
+}
+.scrollable {
+    overflow-x: auto; /* Horizontal scroll */
+    white-space: nowrap; /* Prevents wrapping */
+}
+.horizontal-browse .card:hover {
+    box-shadow: 0 0 1rem rgb(0, 0, 0,.3);
+    transition: .33s;
+}
+.scrollable .card{
+    background-color: #c8e1b8;
+    width: 200px;
+    display: inline-block;
+    margin-right: 10px;
+    object-fit: cover;
+}
+.scrollable .btn-danger{
+    margin-top: 5px;
+    background-color: #dc4343;
 }

@@ -1,8 +1,8 @@
 <?php
 global $conn;
-include ('db_config.php');
+include('db_config.php');
 session_start();
-if(!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit();
 }
@@ -22,39 +22,12 @@ if (isset($_SESSION['user_id'])) {
         $isAdmin = true;
     }
 }
-if (isset($_GET['action']) && isset($_GET['id'])) {
-    $listing_id = $_GET['id'];
-    $user_id = $_SESSION['user_id'];
-
-    try {
-        if ($_GET['action'] == 'add') {
-            // Dodavanje u favorites
-            $stmt = $conn->prepare("INSERT INTO favorites (user_id, listing_id) VALUES (:user_id, :listing_id)");
-        } elseif ($_GET['action'] == 'remove') {
-            // Uklanjanje iz favorites
-            $stmt = $conn->prepare("DELETE FROM favorites WHERE user_id = :user_id AND listing_id = :listing_id");
-        } else {
-            echo "Invalid action";
-            exit();
-        }
-
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt->bindParam(':listing_id', $listing_id, PDO::PARAM_INT);
-        $stmt->execute();
-        echo "success";
-        exit();
-    } catch(PDOException $e) {
-        echo "Error: " . $e->getMessage();
-        exit();
-    }
-}
-
 try {
     $user_id = $_SESSION['user_id'];
-    $stmt = $conn->prepare("SELECT listing_id, title, price, description, image FROM listings1 WHERE listing_id IN (SELECT listing_id FROM favorites WHERE user_id = :user_id)");
+    $stmt = $conn->prepare("SELECT listing_id, title, price, description, image FROM listings1 WHERE user_id = :user_id");
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->execute();
-    $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch(PDOException $e) {
     echo "Error: " . $e->getMessage();
 }
@@ -138,21 +111,23 @@ try {
         </div>
     </div>
 </nav>
+
 <div class="container mt-5">
-    <h1 class="mb-4">Your Favorite Pets</h1>
-    <?php if (empty($favorites)): ?>
-        <p>You have no favorite pets.</p>
+    <h1 class="mb-4">My Listings</h1>
+    <?php if (empty($listings)): ?>
+        <p>You have no listings.</p>
     <?php else: ?>
         <div class="row">
-            <?php foreach ($favorites as $favorite): ?>
+            <?php foreach ($listings as $listing): ?>
                 <div class="col-md-4">
-                    <div class="card mb-4 shadow-sm favcard">
-                        <img src="<?php echo htmlspecialchars($favorite['image']); ?>" class="card-img-top p-2 oglasi" alt="...">
+                    <div class="card mb-4 shadow-sm">
+                        <img src="<?php echo htmlspecialchars($listing['image']); ?>" class="card-img-top p-2 oglasi" alt="...">
                         <div class="card-body">
-                            <h5 class="card-title"><?php echo htmlspecialchars($favorite['title']); ?></h5>
-                            <p class="card-text">Price: $<?php echo htmlspecialchars($favorite['price']); ?></p>
-                            <a href="listing.php?id=<?php echo htmlspecialchars($favorite['listing_id']); ?>" class="btn btn-primary">View Details</a>
-                            <a href="#" class="btn btn-danger remove-from-favorites" data-id="<?php echo htmlspecialchars($favorite['listing_id']); ?>">Remove from favorites</a>
+                            <h5 class="card-title"><?php echo htmlspecialchars($listing['title']); ?></h5>
+                            <p class="card-text">Price: $<?php echo htmlspecialchars($listing['price']); ?></p>
+                            <a href="listing.php?id=<?php echo htmlspecialchars($listing['listing_id']); ?>" class="btn btn-primary">View Details</a>
+                            <!-- Example for removing from listings -->
+                            <a href="#" class="btn btn-danger remove-from-listings" data-id="<?php echo htmlspecialchars($listing['listing_id']); ?>">Remove from listings</a>
                         </div>
                     </div>
                 </div>
@@ -160,5 +135,6 @@ try {
         </div>
     <?php endif; ?>
 </div>
+
 </body>
 </html>

@@ -2,6 +2,22 @@
 global $conn;
 require_once ('db_config.php');
 session_start();
+$isAdmin = false;
+
+// Provera da li je korisnik ulogovan
+if (isset($_SESSION['user_id'])) {
+    // Ako je korisnik ulogovan, dobijamo ulogu korisnika iz baze podataka
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT role FROM user WHERE user_id = :user_id");
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Provera uloge korisnika
+    if ($user && $user['role'] === 'admin') {
+        $isAdmin = true;
+    }
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -34,16 +50,29 @@ session_start();
 
             <ul class="navbar-nav custom-margin-right">
                 <?php if (isset($_SESSION['user_firstname'])): ?>
+                <?php if ($isAdmin): ?>
+                    <li class="nav-item">
+                        <a class="btn btn-danger p-2 ms-3" href="admin_page.php">ADMIN</a>
+                    </li>
                     <li class="nav-item">
                         <a class="btn btn-primary p-2 ms-3" href="add_listing.php">
                             &nbsp;Create Listing&nbsp;
                         </a>
                     </li>
+                    <?php elseif (!$isAdmin):?>
+                        <li class="nav-item">
+                            <a class="btn btn-primary p-2 ms-3" href="add_listing.php">
+                                &nbsp;Create Listing&nbsp;
+                            </a>
+                        </li>
+                <?php endif; ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-fill"></i> <?php echo htmlspecialchars($_SESSION['user_firstname']); ?>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="my_listings.php">My listings</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="favorite_pets.php">Favorite pets</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">Edit account</a></li>
@@ -123,7 +152,7 @@ session_start();
                 }
 
                 // Izvršavanje upita za dohvatanje podataka o oglasima
-                $stmt = $conn->prepare("SELECT listing_id,title, price, image FROM listings");
+                $stmt = $conn->prepare("SELECT listing_id,title, price, image FROM listings1 WHERE approved = 1");
 
                 $stmt->execute();
 
