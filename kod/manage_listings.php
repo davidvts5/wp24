@@ -81,13 +81,16 @@ if ($isAdmin) {
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <?php if ($isAdmin): ?>
                     <li class="nav-item">
-                        <a class="nav-link p-1 ms-5 custom-margin-left" href="manage_pets.php"><i class="bi bi-gear"></i> Manage Categories and Breeds</a>
+                        <a class="nav-link p-2 ms-5 custom-margin-left btn btn-primary" href="manage_pets.php"><i class="bi bi-gear"></i> Manage Categories and Breeds</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link p-1 ms-3" href="manage_listings.php"><i class="bi bi-gear"></i> Manage Listings</a>
+                        <a class="nav-link p-2 ms-3 btn btn-primary" href="manage_listings.php"><i class="bi bi-gear"></i> Manage Listings</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link p-1 ms-3" href="manage_users.php"><i class="bi bi-gear"></i> Manage Users</a>
+                        <a class="nav-link p-2 ms-3 btn btn-primary" href="manage_users.php"><i class="bi bi-gear"></i> Manage Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link p-2 ms-3 btn btn-primary btn btn-admin" href="admin_page.php"><i class="bi bi-gear"></i> ADMIN</a>
                     </li>
                 <?php endif; ?>
             </ul>

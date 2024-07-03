@@ -189,3 +189,13 @@ h5{
     margin-top: 5px;
     background-color: #dc4343;
 }
+.btn-admin{
+    background-color: #dc4343;
+}
+.btn-admin:hover{
+    background-color: #c72222;
+    transition: .33s;
+}
+.input-animal{
+    max-width:fit-content;
+}

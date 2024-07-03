@@ -1,5 +1,4 @@
 <?php
-global $conn;
 session_start();
 include('db_config.php');
 // Provera da li je korisnik ulogovan
@@ -20,8 +19,26 @@ if(!$isAdmin)
 {
     header("Location:index.php");
 }
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $user_id = $_POST['user_id'];
+    $action = $_POST['action'];
 
+    if ($action == 'enable') {
+        $stmt = $conn->prepare("UPDATE user SET status = 1 WHERE user_id = :user_id");
+    } elseif ($action == 'disable') {
+        $stmt = $conn->prepare("UPDATE user SET status = 0 WHERE user_id = :user_id");
+    }
+
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+}
+
+// Dobijanje svih korisnika iz baze
+$stmt = $conn->prepare("SELECT user_id, first_name, last_name, email,phone,status FROM user");
+$stmt->execute();
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -34,7 +51,6 @@ if(!$isAdmin)
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-
 <nav class="navbar navbar-expand-lg navbar-light shadow-sm p-2">
     <div class="container-fluid">
         <a class="navbar-brand p-1 ms-6" href="index.php">PawsPlanet</a>
@@ -53,13 +69,13 @@ if(!$isAdmin)
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <?php if ($isAdmin): ?>
                     <li class="nav-item">
-                        <a class="nav-link p-2 ms-3 btn btn-primary" href="manage_pets.php"><i class="bi bi-gear"></i> Manage Categories and Breeds</a>
+                        <a class="nav-link p-2 ms-3 btn btn-primary btn btn-primary" href="manage_pets.php"><i class="bi bi-gear"></i> Manage Categories and Breeds</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link p-2 ms-3 btn btn-primary" href="manage_listings.php"><i class="bi bi-gear"></i> Manage Listings</a>
+                        <a class="nav-link p-2 ms-3 btn btn-primary btn btn-primary" href="manage_listings.php"><i class="bi bi-gear"></i> Manage Listings</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link p-2 ms-3 btn btn-primary" href="manage_users.php"><i class="bi bi-gear"></i> Manage Users</a>
+                        <a class="nav-link p-2 ms-3 btn btn-primary btn btn-primary" href="manage_users.php"><i class="bi bi-gear"></i> Manage Users</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link p-2 ms-3 btn btn-primary btn btn-admin" href="admin_page.php"><i class="bi bi-gear"></i> ADMIN</a>
@@ -69,7 +85,45 @@ if(!$isAdmin)
         </div>
     </div>
 </nav>
-
-
+<div class="container mt-5">
+    <h1>Manage Users</h1>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($users as $user): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($user['user_id']); ?></td>
+                    <td><?php echo htmlspecialchars($user['first_name']); ?></td>
+                    <td><?php echo htmlspecialchars($user['last_name']); ?></td>
+                    <td><?php echo htmlspecialchars($user['email']); ?></td>
+                    <td><?php echo htmlspecialchars($user['phone']); ?></td>
+                    <td><?php echo $user['status'] ? 'Enabled' : 'Disabled'; ?></td>
+                    <td>
+                        <form action="manage_users.php" method="post" style="display: inline;">
+                            <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($user['user_id']); ?>">
+                            <?php if ($user['status']): ?>
+                                <button type="submit" name="action" value="disable" class="btn btn-danger">Disable</button>
+                            <?php else: ?>
+                                <button type="submit" name="action" value="enable" class="btn btn-success">Enable</button>
+                            <?php endif; ?>
+                        </form>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>

@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_SESSION['email'];
     $description = $_POST['description'];
     $price = $_POST['price'];
+    $age=$_POST['age'];
     $user_id = $_SESSION['user_id'];
     $category_id = $_POST['category_id'];
     $breed_id = $_POST['breed_option'];
@@ -97,14 +98,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
             // Unesi podatke u bazu
-            $stmt = $conn->prepare("INSERT INTO listings1 (user_id, category_id, breed_id, title, description, price, image) VALUES (:user_id, :category_id, :breed_id, :title, :description, :price, :image)");
+            $stmt = $conn->prepare("INSERT INTO listings1 (user_id, category_id, breed_id, title, description, price,age, image,email,phone) VALUES (:user_id, :category_id, :breed_id, :title, :description, :price,:age, :image,:email,:phone)");
             $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
             $stmt->bindParam(':category_id', $category_id, PDO::PARAM_INT);
             $stmt->bindParam(':breed_id', $breed_id, PDO::PARAM_INT);
             $stmt->bindParam(':title', $title, PDO::PARAM_STR);
             $stmt->bindParam(':description', $description, PDO::PARAM_STR);
             $stmt->bindParam(':price', $price, PDO::PARAM_STR);
+            $stmt->bindParam(':age', $age, PDO::PARAM_STR);
             $stmt->bindParam(':image', $target_file, PDO::PARAM_STR);
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+            $stmt->bindParam(':phone', $phone, PDO::PARAM_STR);
             $stmt->execute();
 
             // Poruka o uspehu

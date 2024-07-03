@@ -54,7 +54,7 @@ if (isset($_SESSION['user_id'])) {
                 <?php if (isset($_SESSION['user_firstname'])): ?>
                     <?php if ($isAdmin): ?>
                         <li class="nav-item">
-                            <a class="btn btn-danger p-2 ms-3" href="admin_page.php">ADMIN</a>
+                            <a class="nav-link p-2 ms-3 btn btn-primary btn btn-admin" href="admin_page.php"><i class="bi bi-gear"></i> ADMIN</a>
                         </li>
                     <li class="nav-item">
                         <a class="btn btn-primary p-2 ms-3" href="add_listing.php">

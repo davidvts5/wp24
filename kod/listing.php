@@ -99,6 +99,7 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </div>
 </nav>
+
 <?php
 if (isset($_GET['id'])) {
     $id = $_GET['id'];

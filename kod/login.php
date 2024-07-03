@@ -24,14 +24,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Dobijanje podataka o korisniku
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
+if($user['status']==1) {
     // Provera da li korisnik postoji i da li je uneta ispravna lozinka
     if ($user && password_verify($password, $user['password'])) {
         // Uspešna prijava, pohranjujemo ime korisnika u sesiju
         session_start();
         $_SESSION['user_id'] = $user['user_id']; // Postavljanje user_id u sesiju
-        $_SESSION['email']=$user['email'];
-        $_SESSION['phone']=$user['phone'];
+        $_SESSION['email'] = $user['email'];
+        $_SESSION['phone'] = $user['phone'];
         $_SESSION['user_firstname'] = $user['first_name'];
 
         // Preusmeravamo korisnika na početnu stranicu
@@ -41,6 +41,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Neuspešna prijava, možemo sada preusmeriti korisnika nazad na login stranicu sa odgovarajućom porukom
         $error = "Invalid email or password";
     }
+}
+else{
+    $error="You are banned by the administrator!";
+}
 }
 ?>
 
