@@ -17,7 +17,6 @@ if (isset($_SESSION['user_id'])) {
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Provera uloge korisnika
     if ($user && $user['role'] === 'admin') {
         $isAdmin = true;
     }

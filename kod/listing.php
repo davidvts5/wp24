@@ -100,7 +100,6 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
     echo $id;
     try {
-        // Dohvatanje osnovnih podataka o oglasu
         $stmt = $conn->prepare("SELECT * FROM listings1 WHERE listing_id = :id");
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         $stmt->execute();

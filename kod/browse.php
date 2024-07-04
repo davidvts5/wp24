@@ -219,10 +219,6 @@ $ads = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="row">
                 <?php
 
-
-                // Izvršavanje upita za dohvatanje podataka o oglasima
-
-
                 foreach ($ads as $ad) {
                     ?>
                     <div class="col-6 col-md-3 mb-4">

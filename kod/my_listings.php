@@ -126,7 +126,7 @@ try {
                             <h5 class="card-title"><?php echo htmlspecialchars($listing['title']); ?></h5>
                             <p class="card-text">Price: $<?php echo htmlspecialchars($listing['price']); ?></p>
                             <a href="listing.php?id=<?php echo htmlspecialchars($listing['listing_id']); ?>" class="btn btn-primary">View Details</a>
-                            <!-- Example for removing from listings -->
+
                             <a href="#" class="btn btn-danger remove-from-listings" data-id="<?php echo htmlspecialchars($listing['listing_id']); ?>">Remove from listings</a>
                         </div>
                     </div>

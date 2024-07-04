@@ -111,7 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bindParam(':phone', $phone, PDO::PARAM_STR);
             $stmt->execute();
 
-            // Poruka o uspehu
             echo "The file " . htmlspecialchars(basename($_FILES["image"]["name"])) . " LISTING IS CREATED!!!!";
         }
     }
