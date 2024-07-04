@@ -145,7 +145,7 @@ $ads = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="favorite_pets.php">Favorite pets</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Edit account</a></li>
+                            <li><a class="dropdown-item" href="edit_account.php">Edit account</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="logout.php">Sign out</a></li>
                         </ul>
