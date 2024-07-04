@@ -19,7 +19,44 @@ if (isset($_SESSION['user_id'])) {
         $isAdmin = true;
     }
 }
+// Provera da li je korisnik ulogovan
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
 
+// Dobijanje korisničkih podataka iz baze
+$user_id = $_SESSION['user_id'];
+$stmt = $conn->prepare("SELECT * FROM user WHERE user_id = :user_id");
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Ako je poslata forma za izmenu podataka
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $first_name = $_POST['first_name'];
+    $last_name = $_POST['last_name'];
+    $email = $_POST['email'];
+    $password = !empty($_POST['password']) ? password_hash($_POST['password'], PASSWORD_BCRYPT) : $user['password'];
+    $phone = $_POST['phone'];
+
+    // Ažuriranje podataka u bazi
+    $stmt = $conn->prepare("UPDATE user SET first_name = :first_name, last_name = :last_name, email = :email, password = :password, phone = :phone WHERE user_id = :user_id");
+    $stmt->bindParam(':first_name', $first_name);
+    $stmt->bindParam(':last_name', $last_name);
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':password', $password);
+    $stmt->bindParam(':phone', $phone);
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+
+    if ($stmt->execute()) {
+        $_SESSION['user_first_name'] = $first_name;
+        header("Location: edit_account.php?success=1");
+        exit();
+    } else {
+        $error_message = "There was an error updating your information. Please try again.";
+    }
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -51,16 +88,16 @@ if (isset($_SESSION['user_id'])) {
             </ul>
 
             <ul class="navbar-nav custom-margin-right">
-                <?php if (isset($_SESSION['user_firstname'])): ?>
+                <?php if (isset($_SESSION['user_first_name'])): ?>
                     <?php if ($isAdmin): ?>
                         <li class="nav-item">
                             <a class="nav-link p-2 ms-3 btn btn-primary btn btn-admin" href="admin_page.php"><i class="bi bi-gear"></i> ADMIN</a>
                         </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary p-2 ms-3" href="add_listing.php">
-                            &nbsp;Create Listing&nbsp;
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary p-2 ms-3" href="add_listing.php">
+                                &nbsp;Create Listing&nbsp;
+                            </a>
+                        </li>
                     <?php elseif (!$isAdmin):?>
                         <li class="nav-item">
                             <a class="btn btn-primary p-2 ms-3" href="add_listing.php">
@@ -70,7 +107,7 @@ if (isset($_SESSION['user_id'])) {
                     <?php endif; ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-fill"></i> <?php echo htmlspecialchars($_SESSION['user_firstname']); ?>
+                            <i class="bi bi-person-fill"></i> <?php echo htmlspecialchars($_SESSION['user_first_name']); ?>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="my_listings.php">My listings</a></li>
@@ -98,13 +135,37 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </div>
 </nav>
-<?php
-if(isset($_SESSION['user_firstname'])){
-    echo "Welcome " . $_SESSION['user_firstname'];
-}
-else{
-    echo "User is not logged in.";
-}
-?>
+<div class="container mt-5">
+    <h2>Edit Account</h2>
+    <?php if (isset($error_message)): ?>
+        <div class="alert alert-danger"><?php echo $error_message; ?></div>
+    <?php elseif (isset($_GET['success'])): ?>
+        <div class="alert alert-success">Your information has been updated successfully.</div>
+    <?php endif; ?>
+    <form method="POST" action="edit_account.php">
+        <div class="mb-3">
+            <label for="first_name" class="form-label">First Name</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" value="<?php echo htmlspecialchars($user['first_name']); ?>" required>
+        </div>
+        <div class="mb-3">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" value="<?php echo htmlspecialchars($user['last_name']); ?>" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Leave blank to keep current password">
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label">Phone Number</label>
+            <input type="text" class="form-control" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone']); ?>" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+
 </body>
 </html>

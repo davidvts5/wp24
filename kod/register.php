@@ -1,6 +1,8 @@
 <?php
 session_start();
-
+require_once './src/PHPMailer.php';
+require_once './src/SMTP.php';
+require_once './src/Exception.php';
 // Redirect to homepage if the user is already logged in
 if (isset($_SESSION['user_id'])) {
     header("Location: index.php");
@@ -40,22 +42,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $error_message = "The email address is already registered.";
             } else {
 
-
+                $activation_token=bin2hex(random_bytes(16));
+                $activation_token_hash=hash("sha256",$activation_token);
                 // Hashovanje lozinke pre čuvanja u bazi
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
                 // SQL upit za dodavanje korisnika u bazu
-                $sql = "INSERT INTO user (first_name, last_name, email, password,phone) VALUES (:first_name, :last_name, :email, :password,:phone)";
+                $sql = "INSERT INTO user (first_name, last_name, email, password,phone,account_activation_hash) VALUES (:first_name, :last_name, :email, :password,:phone,:account_activation_hash)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bindParam(':first_name', $first_name);
                 $stmt->bindParam(':last_name', $last_name);
                 $stmt->bindParam(':email', $email);
                 $stmt->bindParam(':phone', $phone);
                 $stmt->bindParam(':password', $hashed_password);
+                $stmt->bindParam(':account_activation_hash', $activation_token_hash);
 
 
                 if ($stmt->execute()) {
-                    // Uspešno dodavanje, preusmeri na success.php
                     header("Location: success.php");
                     exit();
                 } else {

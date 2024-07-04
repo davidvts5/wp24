@@ -18,6 +18,75 @@ if (isset($_SESSION['user_id'])) {
         $isAdmin = true;
     }
 }
+
+// Dohvatanje tipova životinja i rasa
+$stmt = $conn->prepare("SELECT category_id, name FROM categories");
+$stmt->execute();
+$animal_types = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt = $conn->prepare("SELECT breed_id, category_id, name FROM breeds");
+$stmt->execute();
+$breeds = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Priprema upita za dohvaćanje oglasa sa filtrima
+$query = "
+    SELECT l.listing_id, l.title, l.price, l.image, b.name AS breed_name, c.name AS category_name
+    FROM listings1 l
+    JOIN breeds b ON l.breed_id = b.breed_id
+    JOIN categories c ON b.category_id = c.category_id
+    WHERE l.approved = 1
+";
+
+$conditions = [];
+$params = [];
+
+// Filtriranje po nazivu oglasa
+if (!empty($_GET['search'])) {
+    $conditions[] = "l.title LIKE :search";
+    $params[':search'] = '%' . $_GET['search'] . '%';
+}
+
+// Filtriranje po tipu životinje
+if (!empty($_GET['animal_type'])) {
+    $conditions[] = "c.category_id = :animal_type";
+    $params[':animal_type'] = $_GET['animal_type'];
+}
+
+// Filtriranje po rasi
+if (!empty($_GET['breed'])) {
+    $conditions[] = "b.breed_id = :breed";
+    $params[':breed'] = $_GET['breed'];
+}
+
+// Filtriranje po starosti
+if (!empty($_GET['min_age'])) {
+    $conditions[] = "l.age >= :min_age";
+    $params[':min_age'] = $_GET['min_age'];
+}
+if (!empty($_GET['max_age'])) {
+    $conditions[] = "l.age <= :max_age";
+    $params[':max_age'] = $_GET['max_age'];
+}
+
+// Filtriranje po ceni
+if (!empty($_GET['min_price'])) {
+    $conditions[] = "l.price >= :min_price";
+    $params[':min_price'] = $_GET['min_price'];
+}
+if (!empty($_GET['max_price'])) {
+    $conditions[] = "l.price <= :max_price";
+    $params[':max_price'] = $_GET['max_price'];
+}
+
+// Kombinovanje uslova
+if (count($conditions) > 0) {
+    $query .= ' AND ' . implode(' AND ', $conditions);
+}
+
+$stmt = $conn->prepare($query);
+$stmt->execute($params);
+$ads = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -29,6 +98,7 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <script src="js.js"></script>
 </head>
 <body>
 
@@ -110,30 +180,31 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="mb-3">
                         <label for="animal_type" class="form-label">Animal Type</label>
-                        <select class="form-select ddlist" id="animal_type" name="animal_type" onchange="updateBreedOptions()">
+                        <select class="form-select" id="animal_type" name="animal_type">
                             <option value="">Select animal type</option>
-                            <option value="Dog">Dog</option>
-                            <option value="Cat">Cat</option>
-                            <option value="Fish">Fish</option>
-                            <option value="Other">Other</option>
+                            <?php foreach ($animal_types as $type): ?>
+                                <option value="<?php echo $type['category_id']; ?>"><?php echo htmlspecialchars($type['name']); ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="breed" class="form-label">Breed</label>
-                        <select class="form-select ddlist" id="breed" name="breed">
-                            <option value="">Select animal type</option>
-                            <!-- Breed options will be updated based on animal type -->
+                        <select class="form-select" id="breed" name="breed">
+                            <option value="">Select breed</option>
+                            <?php foreach ($breeds as $breed): ?>
+                                <option value="<?php echo $breed['breed_id']; ?>" data-category-id="<?php echo $breed['category_id']; ?>"><?php echo htmlspecialchars($breed['name']); ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="age" class="form-label">Age</label>
+                        <label for="min_age" class="form-label">Age</label>
                         <div class="d-flex">
                             <input type="number" class="form-control me-2" id="min_age" name="min_age" placeholder="Min age">
                             <input type="number" class="form-control" id="max_age" name="max_age" placeholder="Max age">
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="price" class="form-label">Price</label>
+                        <label for="min_price" class="form-label">Price</label>
                         <div class="d-flex">
                             <input type="number" class="form-control me-2" id="min_price" name="min_price" placeholder="Min price">
                             <input type="number" class="form-control" id="max_price" name="max_price" placeholder="Max price">
@@ -152,12 +223,7 @@ if (isset($_SESSION['user_id'])) {
                 }
 
                 // Izvršavanje upita za dohvatanje podataka o oglasima
-                $stmt = $conn->prepare("SELECT listing_id,title, price, image FROM listings1 WHERE approved = 1");
 
-                $stmt->execute();
-
-                // Postavljanje rezultata u asocijativni niz
-                $ads = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 foreach ($ads as $ad) {
                     ?>
@@ -165,9 +231,11 @@ if (isset($_SESSION['user_id'])) {
                         <div class="card">
                             <img src="<?php echo htmlspecialchars($ad['image']); ?>" class="card-img-top p-2 oglasi" alt="Ad Image">
                             <div class="card-body">
-                                <h5 class="card-title"><?php echo htmlspecialchars($ad['title']); ?></h5>
-                                <p class="card-text">Price: $<?php echo htmlspecialchars($ad['price']); ?></p>
-                                <a href="listing.php?id=<?php echo htmlspecialchars($ad['listing_id']); ?>" class="btn btn-primary">View Details</a><br>
+                                <h5 class="card-title"><b><?php echo htmlspecialchars($ad['title']); ?></b></h5>
+                                <i><span class="card-text">Price: $<?php echo htmlspecialchars($ad['price']); ?></span></i><br>
+                                <u><span class="card-text"> <?php echo htmlspecialchars($ad['category_name']); ?>,</span>
+                                <span class="card-text"><?php echo htmlspecialchars($ad['breed_name']); ?></span></u>
+                                <a href="listing.php?id=<?php echo htmlspecialchars($ad['listing_id']); ?>" class="btn btn-primary mt-2">View Details</a><br>
                             </div>
                         </div>
                     </div>
@@ -181,29 +249,6 @@ if (isset($_SESSION['user_id'])) {
 </div>
 </body>
 </html>
-<script>
-    function updateBreedOptions() {
-        var animalType = document.getElementById("animal_type").value;
-        var breedSelect = document.getElementById("breed");
-        breedSelect.innerHTML = ""; // Clear existing options
-
-        var breeds = {
-            "Dog": ["Labrador", "German Shepherd", "Golden Retriever"],
-            "Cat": ["Persian", "Maine Coon", "Siamese"],
-            "Fish": ["Goldfish", "Betta", "Guppy"],
-            "Other": ["Parrot", "Hamster", "Rabbit"]
-        };
-
-        if (breeds[animalType]) {
-            breeds[animalType].forEach(function(breed) {
-                var option = document.createElement("option");
-                option.value = breed;
-                option.text = breed;
-                breedSelect.appendChild(option);
-            });
-        }
-    }
-</script>
 <?php
 
 $conn = null;
