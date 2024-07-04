@@ -218,9 +218,7 @@ $ads = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="col-md-8 order-2 order-md-1 browse">
             <div class="row">
                 <?php
-                if (isset($_GET['search'])){
-                    $search = $_GET['search'];
-                }
+
 
                 // Izvršavanje upita za dohvatanje podataka o oglasima
 
